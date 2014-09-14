@@ -2,7 +2,8 @@
     'targets': [{
         'target_name': 'rsautl',
         'sources': [
-            'src/rsautl.cc'
+            'src/rsautl.cc',
+            'src/compat.cc',
         ],
         'include_dirs': [
             "<!(node -e \"require('nan')\")"
