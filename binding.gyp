@@ -1,9 +1,9 @@
 {
     'targets': [{
-        'target_name': 'rsautl',
+        'target_name': 'forsaken',
         'sources': [
-            'src/rsautl.cc',
-            'src/compat.cc',
+            'src/forsaken.cc',
+            'src/ssl.cc'
         ],
         'include_dirs': [
             "<!(node -e \"require('nan')\")"

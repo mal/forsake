@@ -1,21 +1,26 @@
+// A large amount of this file was extracted from node_crypto.cc as it
+// was not readily exposed by node core.
+
 #include <string.h>
 
+#include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
+#include <openssl/x509.h>
 
-#include "compat.h"
+#include "ssl.h"
 
 // Forcibly clear OpenSSL's error stack on return. This stops stale errors
 // from popping up later in the lifecycle of crypto operations where they
 // would cause spurious failures. It's a rather blunt method, though.
 // ERR_clear_error() isn't necessarily cheap either.
-struct ClearErrorOnReturn {
-  ~ClearErrorOnReturn() { ERR_clear_error(); }
-};
+ClearErrorOnReturn::~ClearErrorOnReturn() {
+  ERR_clear_error();
+}
 
-static int CryptoPemCallback(char *buf, int size, int rwflag, void *u) {
+int CryptoPemCallback(char *buf, int size, int rwflag, void *u) {
   if (u) {
     size_t buflen = static_cast<size_t>(size);
     size_t len = strlen(static_cast<const char*>(u));
@@ -39,10 +44,7 @@ BIO *bio_from_buffer(const char *buf, int size) {
   return NULL;
 }
 
-RSA* rsa_private_key(const char *buf, int size, const char *passphrase) {
-  ClearErrorOnReturn clear_error_on_return;
-  (void) &clear_error_on_return; // Silence compiler warning.
-
+RSA *ssl_private_key(const char *buf, int size, const char *passphrase) {
   bool fatal = true;
 
   EVP_PKEY *pkey = NULL;
@@ -74,10 +76,7 @@ RSA* rsa_private_key(const char *buf, int size, const char *passphrase) {
   return rsa;
 }
 
-RSA *rsa_public_key(const char *buf, int size) {
-  ClearErrorOnReturn clear_error_on_return;
-  (void) &clear_error_on_return; // Silence compiler warning.
-
+RSA *ssl_public_key(const char *buf, int size) {
   bool fatal = true;
 
   EVP_PKEY *pkey = NULL;
@@ -130,4 +129,16 @@ RSA *rsa_public_key(const char *buf, int size) {
     return NULL;
 
   return rsa;
+}
+
+const char *ssl_error_str (const char **message, const char *fallback) {
+  unsigned long err = ERR_get_error();
+  if (err != 0 || fallback == NULL) {
+    int size = 128;
+    *message = new char[size];
+    ERR_error_string_n(err, (char *) *message, size);
+  } else {
+    *message = fallback;
+  }
+  return *message;
 }
