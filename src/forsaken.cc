@@ -14,12 +14,17 @@
   char *VAR = node::Buffer::Data(_ ## VAR);                                   \
   size_t VAR ## _len = node::Buffer::Length(_ ## VAR);
 
+#define REQ_INT_ARG(I, VAR)                                                   \
+  if (args.Length() <= (I) || !args[I]->IsNumber())                           \
+    return NanThrowTypeError("Argument " #I " must be an integer");           \
+  int VAR = args[I]->ToInteger()->Value();
+
 #define KEY_private                                                           \
   NanUtf8String passphrase(args[2]);                                          \
-  RSA* rsa = rsa_private_key(key_pem, key_pem_len, *passphrase);
+  RSA *rsa = rsa_private_key(key_pem, key_pem_len, *passphrase);
 
 #define KEY_public                                                            \
-  RSA* rsa = rsa_public_key(key_pem, key_pem_len);
+  RSA *rsa = rsa_public_key(key_pem, key_pem_len);
 
 #define RSAUTL_METHOD(NAME, KEY, OP)                                          \
 NAN_METHOD(NAME) {                                                            \
@@ -32,11 +37,11 @@ NAN_METHOD(NAME) {                                                            \
   const char *err_msg = NULL;                                                 \
   int out_len = 0;                                                            \
   char *out = NULL;                                                           \
-  int pad = RSA_PKCS1_PADDING;                                                \
   bool fatal = true;                                                          \
                                                                               \
   REQ_BUF_ARG(0, in)                                                          \
   REQ_BUF_ARG(1, key_pem)                                                     \
+  REQ_INT_ARG(3, pad)                                                         \
                                                                               \
   KEY_ ## KEY                                                                 \
   if (rsa == NULL)                                                            \
@@ -78,10 +83,17 @@ void InitOnce() {
 void Init(Handle<Object> exports) {
   static uv_once_t init_once = UV_ONCE_INIT;
   uv_once(&init_once, InitOnce);
+
+  NODE_DEFINE_CONSTANT(exports, RSA_NO_PADDING);
+  NODE_DEFINE_CONSTANT(exports, RSA_PKCS1_OAEP_PADDING);
+  NODE_DEFINE_CONSTANT(exports, RSA_PKCS1_PADDING);
+  NODE_DEFINE_CONSTANT(exports, RSA_SSLV23_PADDING);
+  NODE_DEFINE_CONSTANT(exports, RSA_X931_PADDING);
+
   NODE_SET_METHOD(exports, "decrypt", Decrypt);
   NODE_SET_METHOD(exports, "encrypt", Encrypt);
   NODE_SET_METHOD(exports, "sign",    Sign);
   NODE_SET_METHOD(exports, "verify",  Verify);
 }
 
-NODE_MODULE(rsautl, Init)
+NODE_MODULE(forsaken, Init)

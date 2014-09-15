@@ -44,7 +44,7 @@ BIO *bio_from_buffer(const char *buf, int size) {
   return NULL;
 }
 
-RSA *ssl_private_key(const char *buf, int size, const char *passphrase) {
+RSA *rsa_private_key(const char *buf, int size, const char *passphrase) {
   bool fatal = true;
 
   EVP_PKEY *pkey = NULL;
@@ -76,7 +76,7 @@ RSA *ssl_private_key(const char *buf, int size, const char *passphrase) {
   return rsa;
 }
 
-RSA *ssl_public_key(const char *buf, int size) {
+RSA *rsa_public_key(const char *buf, int size) {
   bool fatal = true;
 
   EVP_PKEY *pkey = NULL;
