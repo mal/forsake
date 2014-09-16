@@ -150,7 +150,7 @@ describe('forsake', function() {
             var payload = fs.readFileSync(fixtures + '/encrypted_oaep.txt');
             var opts = { padding: forsake.RSA_PKCS1_OAEP_PADDING };
             var fn = function () { forsake.decrypt(payload, pkey_b, opts); };
-            expect(fn).to.throw(Error, /\bdata too large for modulus\b/);
+            expect(fn).to.throw(Error, /\bRSA_padding_check_PKCS1_OAEP\b/);
         });
 
         it('should throw while verifying with X9.31', function () {
@@ -160,6 +160,23 @@ describe('forsake', function() {
             expect(fn).to.throw(Error, /\bRSA_padding_check_X931\b/);
         });
 
+    });
+
+    describe('when using PKCS#8 keys', function () {
+        it.skip('should support encrypting');
+        it.skip('should support verifying');
+    });
+
+    describe('when using X509 keys', function () {
+        it.skip('should support encrypting');
+        it.skip('should support verifying');
+    });
+
+    describe('when using invalid keys', function () {
+        it.skip('should throw while encrypting');
+        it.skip('should throw while decrypting');
+        it.skip('should throw while signing');
+        it.skip('should throw while verifying');
     });
 
 });
