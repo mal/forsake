@@ -132,4 +132,34 @@ describe('forsake', function() {
 
     });
 
+    describe('when using the wrong keys', function () {
+
+        it('should throw while decrypting', function () {
+            var payload = fs.readFileSync(fixtures + '/encrypted.txt');
+            var fn = function () { forsake.decrypt(payload, pkey_b); };
+            expect(fn).to.throw(Error, /\bRSA_padding_check_PKCS1_type_2\b/);
+        });
+
+        it('should throw while verifying', function () {
+            var payload = fs.readFileSync(fixtures + '/signed.txt');
+            var fn = function () { forsake.verify(payload, pubkey_b); };
+            expect(fn).to.throw(Error, /\bRSA_padding_check_PKCS1_type_1\b/);
+        });
+
+        it('should throw while decrypting with OAEP', function () {
+            var payload = fs.readFileSync(fixtures + '/encrypted_oaep.txt');
+            var opts = { padding: forsake.RSA_PKCS1_OAEP_PADDING };
+            var fn = function () { forsake.decrypt(payload, pkey_b, opts); };
+            expect(fn).to.throw(Error, /\bdata too large for modulus\b/);
+        });
+
+        it('should throw while verifying with X9.31', function () {
+            var payload = fs.readFileSync(fixtures + '/signed_x931.txt');
+            var opts = { padding: forsake.RSA_X931_PADDING };
+            var fn = function () { forsake.verify(payload, pubkey_b, opts); };
+            expect(fn).to.throw(Error, /\bRSA_padding_check_X931\b/);
+        });
+
+    });
+
 });
