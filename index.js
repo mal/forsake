@@ -1,8 +1,12 @@
 var forsakeN = require('./build/Release/forsaken.node');
 var forsake = module.exports = {};
 
+var RsaError = require('./lib/error/rsa.js');
+
 var PAD = forsakeN.RSA_PKCS1_PADDING;
 var supported = [];
+
+forsake.RsaError = RsaError;
 
 Object.keys(forsakeN).forEach(function (key) {
     var value = forsakeN[key];
@@ -26,6 +30,10 @@ Object.keys(forsakeN).forEach(function (key) {
         if (!Buffer.isBuffer(key))
             key = new Buffer(key);
 
-        return value(input, key, passphrase, padding);
+        try {
+            return value(input, key, passphrase, padding);
+        } catch (messages) {
+            throw new RsaError(messages);
+        }
     };
 });
