@@ -14,6 +14,6 @@ struct ClearErrorOnReturn {
 
 RSA *rsa_private_key(const char *buf, int size, const char *passphrase);
 RSA *rsa_public_key (const char *buf, int size);
-const char *ssl_error_str (const char **message, const char *fallback = NULL);
+const char *ssl_error_str (const char **message);
 
 #endif // SRC_NODE_FORSAKE_SSL_H_

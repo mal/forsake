@@ -131,14 +131,14 @@ RSA *rsa_public_key(const char *buf, int size) {
   return rsa;
 }
 
-const char *ssl_error_str (const char **message, const char *fallback) {
+const char *ssl_error_str (const char **message) {
   unsigned long err = ERR_get_error();
-  if (err != 0 || fallback == NULL) {
+  if (err != 0) {
     int size = 128;
     *message = new char[size];
     ERR_error_string_n(err, (char *) *message, size);
   } else {
-    *message = fallback;
+    *message = NULL;
   }
   return *message;
 }

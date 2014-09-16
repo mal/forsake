@@ -4,9 +4,6 @@
 #include <openssl/ssl.h>
 #include "ssl.h"
 
-// #define LOG(msg) printf("%s\n", msg);
-#define LOG(msg) ;
-
 #define REQ_BUF_ARG(I, VAR)                                                   \
   if (args.Length() <= (I) || !node::Buffer::HasInstance(args[I]))            \
     return NanThrowTypeError("Argument " #I " must be a buffer");             \
@@ -29,15 +26,12 @@
 #define RSAUTL_METHOD(NAME, KEY, OP)                                          \
 NAN_METHOD(NAME) {                                                            \
   NanScope();                                                                 \
-  LOG("Beginning " #NAME)                                                     \
                                                                               \
   ClearErrorOnReturn clear_error_on_return;                                   \
   (void) &clear_error_on_return; /* Silence compiler warning */               \
                                                                               \
-  const char *err_msg = NULL;                                                 \
   int out_len = 0;                                                            \
   char *out = NULL;                                                           \
-  bool fatal = true;                                                          \
                                                                               \
   REQ_BUF_ARG(0, in)                                                          \
   REQ_BUF_ARG(1, key_pem)                                                     \
@@ -45,7 +39,7 @@ NAN_METHOD(NAME) {                                                            \
                                                                               \
   KEY_ ## KEY                                                                 \
   if (rsa == NULL)                                                            \
-    goto exit;                                                                \
+    return NanThrowError(GetErrorArray("Unable to load " #KEY " key"));       \
                                                                               \
   out_len = RSA_size(rsa);                                                    \
   out = new char[out_len];                                                    \
@@ -54,21 +48,31 @@ NAN_METHOD(NAME) {                                                            \
                                    (unsigned char *) out,                     \
                                    rsa,                                       \
                                    pad);                                      \
-  if (out_len > 0)                                                            \
-    fatal = false;                                                            \
-                                                                              \
- exit:                                                                        \
   if (rsa != NULL)                                                            \
     RSA_free(rsa);                                                            \
                                                                               \
-  if (fatal)                                                                  \
-    return NanThrowError(ssl_error_str(&err_msg, #NAME " operation failed")); \
+  if (out_len <= 0)                                                           \
+    return NanThrowError(GetErrorArray(#NAME " operation failed"));           \
                                                                               \
   Local<Value> rc = NanNewBufferHandle(out, out_len);                         \
   NanReturnValue(rc);                                                         \
 }
 
 using namespace v8;
+
+Local<Array> GetErrorArray(const char *message) {
+  Local<Array> out = NanNew<Array>();
+  int index = 0;
+  const char *line = NULL;
+
+  out->Set(NanNew<Number>(index++), NanNew(message));
+
+  while (ssl_error_str(&line)) {
+    out->Set(NanNew<Number>(index++), NanNew(line));
+  }
+
+  return out;
+}
 
 RSAUTL_METHOD(Decrypt, private, decrypt)
 RSAUTL_METHOD(Encrypt, public,  encrypt)
