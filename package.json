@@ -1,15 +1,28 @@
 {
   "name": "forsake",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "For RSA sake! Native bindings for rsautl functions",
   "main": "index.js",
   "scripts": {
     "install": "node-gyp configure build",
     "test": "node_modules/.bin/mocha --reporter dot"
   },
+  "keywords": [
+    "decrypt",
+    "encrypt",
+    "openssl",
+    "rsa",
+    "rsautl",
+    "sign",
+    "verify"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mal/forsake.git"
+  },
   "author": {
-      "name": "Mal Graty",
-      "email": "mal.graty@googlemail.com"
+    "name": "Mal Graty",
+    "email": "mal.graty@googlemail.com"
   },
   "license": "ISC",
   "dependencies": {
