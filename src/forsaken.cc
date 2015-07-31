@@ -5,19 +5,19 @@
 #include "ssl.h"
 
 #define REQ_BUF_ARG(I, VAR)                                                   \
-  if (args.Length() <= (I) || !node::Buffer::HasInstance(args[I]))            \
-    return NanThrowTypeError("Argument " #I " must be a buffer");             \
-  Local<Object> _ ## VAR = args[I]->ToObject();                               \
+  if (info.Length() <= (I) || !node::Buffer::HasInstance(info[I]))            \
+    return Nan::ThrowTypeError("Argument " #I " must be a buffer");           \
+  Local<Object> _ ## VAR = info[I]->ToObject();                               \
   char *VAR = node::Buffer::Data(_ ## VAR);                                   \
   size_t VAR ## _len = node::Buffer::Length(_ ## VAR);
 
 #define REQ_INT_ARG(I, VAR)                                                   \
-  if (args.Length() <= (I) || !args[I]->IsNumber())                           \
-    return NanThrowTypeError("Argument " #I " must be an integer");           \
-  int VAR = args[I]->ToInteger()->Value();
+  if (info.Length() <= (I) || !info[I]->IsNumber())                           \
+    return Nan::ThrowTypeError("Argument " #I " must be an integer");         \
+  int VAR = info[I]->ToInteger()->Value();
 
 #define KEY_private                                                           \
-  NanUtf8String passphrase(args[2]);                                          \
+  Nan::Utf8String passphrase(info[2]);                                        \
   RSA *rsa = rsa_private_key(key_pem, key_pem_len, *passphrase);
 
 #define KEY_public                                                            \
@@ -25,8 +25,6 @@
 
 #define RSAUTL_METHOD(NAME, KEY, OP)                                          \
 NAN_METHOD(NAME) {                                                            \
-  NanScope();                                                                 \
-                                                                              \
   ClearErrorOnReturn clear_error_on_return;                                   \
   (void) &clear_error_on_return; /* Silence compiler warning */               \
                                                                               \
@@ -39,7 +37,7 @@ NAN_METHOD(NAME) {                                                            \
                                                                               \
   KEY_ ## KEY                                                                 \
   if (rsa == NULL)                                                            \
-    return NanThrowError(GetErrorArray("Unable to load " #KEY " key"));       \
+    return Nan::ThrowError(GetErrorArray("Unable to load " #KEY " key"));     \
                                                                               \
   out_len = RSA_size(rsa);                                                    \
   out = new char[out_len];                                                    \
@@ -52,23 +50,23 @@ NAN_METHOD(NAME) {                                                            \
     RSA_free(rsa);                                                            \
                                                                               \
   if (out_len <= 0)                                                           \
-    return NanThrowError(GetErrorArray(#NAME " operation failed"));           \
+    return Nan::ThrowError(GetErrorArray(#NAME " operation failed"));         \
                                                                               \
-  Local<Value> rc = NanNewBufferHandle(out, out_len);                         \
-  NanReturnValue(rc);                                                         \
+  Local<Value> rc = Nan::NewBuffer(out, out_len).ToLocalChecked();            \
+  info.GetReturnValue().Set(rc);                                              \
 }
 
 using namespace v8;
 
-Local<Array> GetErrorArray(const char *message) {
-  Local<Array> out = NanNew<Array>();
-  int index = 0;
+Local<Value> GetErrorArray(const char *message) {
+  Local<Array> out = Nan::New<Array>();
+  uint32_t index = 0;
   const char *line = NULL;
 
-  out->Set(NanNew<Number>(index++), NanNew(message));
+  Nan::Set(out, index++, Nan::New<String>(message).ToLocalChecked());
 
   while (ssl_error_str(&line)) {
-    out->Set(NanNew<Number>(index++), NanNew(line));
+    Nan::Set(out, index++, Nan::New<String>(line).ToLocalChecked());
   }
 
   return out;
@@ -94,10 +92,10 @@ void Init(Handle<Object> exports) {
   NODE_DEFINE_CONSTANT(exports, RSA_SSLV23_PADDING);
   NODE_DEFINE_CONSTANT(exports, RSA_X931_PADDING);
 
-  NODE_SET_METHOD(exports, "decrypt", Decrypt);
-  NODE_SET_METHOD(exports, "encrypt", Encrypt);
-  NODE_SET_METHOD(exports, "sign",    Sign);
-  NODE_SET_METHOD(exports, "verify",  Verify);
+  Nan::SetMethod(exports, "decrypt", Decrypt);
+  Nan::SetMethod(exports, "encrypt", Encrypt);
+  Nan::SetMethod(exports, "sign",    Sign);
+  Nan::SetMethod(exports, "verify",  Verify);
 }
 
 NODE_MODULE(forsaken, Init)
