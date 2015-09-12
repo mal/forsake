@@ -20,7 +20,7 @@ ClearErrorOnReturn::~ClearErrorOnReturn() {
   ERR_clear_error();
 }
 
-int CryptoPemCallback(char *buf, int size, int rwflag, void *u) {
+static int CryptoPemCallback(char *buf, int size, int rwflag, void *u) {
   if (u) {
     size_t buflen = static_cast<size_t>(size);
     size_t len = strlen(static_cast<const char*>(u));
@@ -31,7 +31,7 @@ int CryptoPemCallback(char *buf, int size, int rwflag, void *u) {
   return 0;
 }
 
-BIO *bio_from_buffer(const char *buf, int size) {
+static BIO *bio_from_buffer(const char *buf, int size) {
   BIO *bp = BIO_new(BIO_s_mem());
   if (bp == NULL)
     goto exit;
@@ -134,9 +134,9 @@ RSA *rsa_public_key(const char *buf, int size) {
 const char *ssl_error_str (const char **message) {
   unsigned long err = ERR_get_error();
   if (err != 0) {
-    int size = 128;
+    size_t size = 128;
     *message = new char[size];
-    ERR_error_string_n(err, (char *) *message, size);
+    ERR_error_string_n(err, const_cast<char *>(*message), size);
   } else {
     *message = NULL;
   }

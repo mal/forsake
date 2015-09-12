@@ -24,7 +24,7 @@
   RSA *rsa = rsa_public_key(key_pem, key_pem_len);
 
 #define RSAUTL_METHOD(NAME, KEY, OP)                                          \
-NAN_METHOD(NAME) {                                                            \
+static NAN_METHOD(NAME) {                                                     \
   ClearErrorOnReturn clear_error_on_return;                                   \
   (void) &clear_error_on_return; /* Silence compiler warning */               \
                                                                               \
@@ -42,8 +42,8 @@ NAN_METHOD(NAME) {                                                            \
   out_len = RSA_size(rsa);                                                    \
   out = new char[out_len];                                                    \
   out_len = RSA_ ## KEY ## _ ## OP(in_len,                                    \
-                                   (unsigned char *) in,                      \
-                                   (unsigned char *) out,                     \
+                                   reinterpret_cast<unsigned char *>(in),     \
+                                   reinterpret_cast<unsigned char *>(out),    \
                                    rsa,                                       \
                                    pad);                                      \
   if (rsa != NULL)                                                            \
@@ -52,13 +52,16 @@ NAN_METHOD(NAME) {                                                            \
   if (out_len <= 0)                                                           \
     return Nan::ThrowError(GetErrorArray(#NAME " operation failed"));         \
                                                                               \
-  Local<Value> rc = Nan::NewBuffer(out, out_len).ToLocalChecked();            \
+  Local<Value> rc = Nan::NewBuffer(                                           \
+    out,                                                                      \
+    static_cast<uint32_t>(out_len)                                            \
+  ).ToLocalChecked();                                                         \
   info.GetReturnValue().Set(rc);                                              \
 }
 
 using namespace v8;
 
-Local<Value> GetErrorArray(const char *message) {
+static Local<Value> GetErrorArray(const char *message) {
   Local<Array> out = Nan::New<Array>();
   uint32_t index = 0;
   const char *line = NULL;
@@ -77,12 +80,12 @@ RSAUTL_METHOD(Encrypt, public,  encrypt)
 RSAUTL_METHOD(Sign,    private, encrypt)
 RSAUTL_METHOD(Verify,  public,  decrypt)
 
-void InitOnce() {
+static void InitOnce() {
   SSL_load_error_strings();
   SSL_library_init();
 }
 
-void Init(Handle<Object> exports) {
+static void Init(Handle<Object> exports) {
   static uv_once_t init_once = UV_ONCE_INIT;
   uv_once(&init_once, InitOnce);
 
