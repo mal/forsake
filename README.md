@@ -11,6 +11,9 @@ For RSA sake! Exposes `openssl rsautl` funtions via a C addon rather than shelli
 $ npm install forsake
 ```
 
+:warning: on Windows, either a 32-bit or 64-bit separately-compiled OpenSSL
+library is required. One can be obtained from [slproweb](http://slproweb.com/products/Win32OpenSSL.html).
+
 ## API
 
 _n.b._ all keys are `Buffer` instances
