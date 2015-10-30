@@ -7,6 +7,7 @@ environment:
     - nodejs: "0.12"
     - nodejs: "3"
     - nodejs: "4"
+    - nodejs: "5"
 
 install:
   # openssl
