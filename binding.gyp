@@ -1,4 +1,9 @@
 {
+    'variables': {
+      # Default for this variable, to get the right behavior for
+      # Node versions <= 0.6.*. or NW.JS or Mac OS X 10.11+
+      'node_shared_openssl%': 'true'
+    },
     'targets': [{
         'target_name': 'forsaken',
         'sources': [
@@ -33,6 +38,15 @@
                 'include_dirs': [
                     '<(openssl_root)/include'
                 ]
+            }, { # OS!="win"
+                'conditions': [[
+                    'node_shared_openssl=="false"',
+                    {
+                      'include_dirs': [
+                        '<(node_root_dir)/deps/openssl/openssl/include'
+                      ]
+                    }
+                ]]
             }
         ]]
     }]
