@@ -11,8 +11,8 @@ environment:
 
 install:
   # openssl
-  - appveyor DownloadFile http://slproweb.com/download/Win32OpenSSL-1_0_2f.exe
-  - Win32OpenSSL-1_0_2f.exe /silent /verysilent /sp- /suppressmsgboxes
+  - appveyor DownloadFile http://slproweb.com/download/Win32OpenSSL-1_0_2g.exe
+  - Win32OpenSSL-1_0_2g.exe /silent /verysilent /sp- /suppressmsgboxes
   # node
   - ps: Install-Product node $env:nodejs
   - IF %nodejs% EQU 0.8 npm -g install npm
