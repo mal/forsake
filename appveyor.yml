@@ -8,14 +8,15 @@ environment:
     - nodejs: "3"
     - nodejs: "4"
     - nodejs: "5"
+    - nodejs: "6"
 
 install:
   # openssl
-  - appveyor DownloadFile http://slproweb.com/download/Win32OpenSSL-1_0_2g.exe
-  - Win32OpenSSL-1_0_2g.exe /silent /verysilent /sp- /suppressmsgboxes
+  - appveyor DownloadFile http://slproweb.com/download/Win32OpenSSL_Light-1_1_0.exe
+  - Win32OpenSSL_Light-1_1_0.exe /silent /verysilent /sp- /suppressmsgboxes
   # node
   - ps: Install-Product node $env:nodejs
-  - IF %nodejs% EQU 0.8 npm -g install npm
+  - npm -g install npm
   - IF %nodejs% EQU 0.8 set PATH=%APPDATA%\npm;%PATH%
   # forsake
   - npm install
