@@ -26,9 +26,9 @@ Object.keys(forsakeN).forEach(function (key) {
         key = key.key || key;
 
         if (!Buffer.isBuffer(input))
-            input = new Buffer(input);
+            input = Buffer.from ? Buffer.from(input) : new Buffer(input);
         if (!Buffer.isBuffer(key))
-            key = new Buffer(key);
+            key = Buffer.from ? Buffer.from(key) : new Buffer(input);
 
         try {
             return value(input, key, passphrase, padding);

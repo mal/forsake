@@ -7,14 +7,14 @@
 #define REQ_BUF_ARG(I, VAR)                                                   \
   if (info.Length() <= (I) || !node::Buffer::HasInstance(info[I]))            \
     return Nan::ThrowTypeError("Argument " #I " must be a buffer");           \
-  Local<Object> _ ## VAR = info[I]->ToObject();                               \
+  Local<Object> _ ## VAR = Nan::To<Object>(info[I]).ToLocalChecked();         \
   char *VAR = node::Buffer::Data(_ ## VAR);                                   \
   size_t VAR ## _len = node::Buffer::Length(_ ## VAR);
 
 #define REQ_INT_ARG(I, VAR)                                                   \
   if (info.Length() <= (I) || !info[I]->IsNumber())                           \
     return Nan::ThrowTypeError("Argument " #I " must be an integer");         \
-  int VAR = info[I]->ToInteger()->Value();
+  int VAR = Nan::To<int>(info[I]).ToChecked();
 
 #define KEY_private                                                           \
   Nan::Utf8String passphrase(info[2]);                                        \
@@ -85,20 +85,20 @@ static void InitOnce() {
   SSL_library_init();
 }
 
-static void Init(Handle<Object> exports) {
+static NAN_MODULE_INIT(Init) {
   static uv_once_t init_once = UV_ONCE_INIT;
   uv_once(&init_once, InitOnce);
 
-  NODE_DEFINE_CONSTANT(exports, RSA_NO_PADDING);
-  NODE_DEFINE_CONSTANT(exports, RSA_PKCS1_OAEP_PADDING);
-  NODE_DEFINE_CONSTANT(exports, RSA_PKCS1_PADDING);
-  NODE_DEFINE_CONSTANT(exports, RSA_SSLV23_PADDING);
-  NODE_DEFINE_CONSTANT(exports, RSA_X931_PADDING);
+  NODE_DEFINE_CONSTANT(target, RSA_NO_PADDING);
+  NODE_DEFINE_CONSTANT(target, RSA_PKCS1_OAEP_PADDING);
+  NODE_DEFINE_CONSTANT(target, RSA_PKCS1_PADDING);
+  NODE_DEFINE_CONSTANT(target, RSA_SSLV23_PADDING);
+  NODE_DEFINE_CONSTANT(target, RSA_X931_PADDING);
 
-  Nan::SetMethod(exports, "decrypt", Decrypt);
-  Nan::SetMethod(exports, "encrypt", Encrypt);
-  Nan::SetMethod(exports, "sign",    Sign);
-  Nan::SetMethod(exports, "verify",  Verify);
+  Nan::SetMethod(target, "decrypt", Decrypt);
+  Nan::SetMethod(target, "encrypt", Encrypt);
+  Nan::SetMethod(target, "sign",    Sign);
+  Nan::SetMethod(target, "verify",  Verify);
 }
 
 NODE_MODULE(forsaken, Init)
