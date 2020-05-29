@@ -1,0 +1,41 @@
+# http://www.appveyor.com/docs/appveyor-yml
+
+build: off
+
+environment:
+  matrix:
+    - nodejs: 0.8
+    - nodejs: 0.10
+    - nodejs: 0.12
+    - nodejs: 3
+    - nodejs: 4
+    - nodejs: 5
+    - nodejs: 6
+    - nodejs: 7
+    - nodejs: 8
+    - nodejs: 9
+    - nodejs: 10
+    - nodejs: 11
+    - nodejs: 12
+    - nodejs: 13
+    - nodejs: 14
+
+install:
+  # openssl
+  - appveyor DownloadFile http://slproweb.com/download/Win32OpenSSL_Light-1_1_1g.exe
+  - Win32OpenSSL_Light-1_1_1g.exe /silent /verysilent /sp- /suppressmsgboxes
+  # node
+  - ps: Install-Product node $env:nodejs
+  - if %nodejs% leq 0.8 npm config set strict-ssl false
+  - if %nodejs% lss 6 npm -g install npm@2.15.11
+  - if %nodejs% leq 0.8 npm config set strict-ssl true
+  - set PATH=%APPDATA%\npm;%PATH%
+  # forsake
+  - npm install
+
+test_script:
+  - node --version
+  - npm --version
+  - npm test
+
+version: '{build}'
