@@ -3,7 +3,7 @@
 For RSA sake! Exposes `openssl rsautl` funtions via a C addon rather than shelling out.
 
   [![Linux Build Status](https://img.shields.io/travis/mal/forsake/master.svg)](https://travis-ci.org/mal/forsake)
-  [![Windows Build status](https://ci.appveyor.com/api/projects/status/ch8pgcee6rn0invn/branch/master?svg=true)](https://ci.appveyor.com/project/mal/forsake/branch/master)
+  [![Windows Build status](https://ci.appveyor.com/api/projects/status/om990mxrkv514nwc/branch/master?svg=true)](https://ci.appveyor.com/project/mal/forsake/branch/master)
   [![NPM version](https://img.shields.io/npm/v/forsake.svg)](http://badge.fury.io/js/forsake)
 
 # Installation
